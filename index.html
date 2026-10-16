@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en" class="static">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Aaron Hong</title>
+  <meta name="description" content="Aaron Hong: interested in the intersection of sound, graphics, and machine learning. Currently working on local ML benchmarks at Microsoft.">
+  <meta name="theme-color" content="#05060a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Aaron Hong">
+  <meta property="og:description" content="Interested in the intersection of sound, graphics, and machine learning.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+  <!-- Switch to WebGL mode right away. If the module never boots (CDN down, old browser), fall back to the plain stacked layout. -->
+  <script>
+    document.documentElement.className = 'gl';
+    setTimeout(function () { if (!window.__portfolioBooted) document.documentElement.className = 'static'; }, 9000);
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="boot" aria-hidden="true"><span class="boot__dot"></span></div>
+
+  <header class="hud">
+    <a class="brand" href="#intro" data-goto="0" aria-label="Aaron Hong — back to start">
+      <span class="brand__mark">ah</span>
+      <span class="brand__name">Aaron Hong</span>
+    </a>
+
+    <nav class="topnav" aria-label="Sections">
+      <ol id="topnav">
+        <li><a href="#about" data-goto="1"><span class="topnav__num">01</span>About</a></li>
+        <li><a href="#projects" data-goto="2"><span class="topnav__num">02</span>Projects</a></li>
+        <li><a href="#toolkit" data-goto="3"><span class="topnav__num">03</span>Toolkit</a></li>
+        <li><a href="#now" data-goto="4"><span class="topnav__num">04</span>Now</a></li>
+        <li><a href="#contact" data-goto="5"><span class="topnav__num">05</span>Contact</a></li>
+      </ol>
+      <span class="topnav__indicator" id="topnavIndicator" aria-hidden="true"></span>
+    </nav>
+
+    <button class="sfx" id="sfxBtn" type="button" aria-pressed="false" title="Toggle sound">
+      <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+        <path d="M3 8h3l4-3.5v11L6 12H3z" fill="currentColor"/>
+        <path class="sfx__waves" d="M13 7.2a4 4 0 0 1 0 5.6M15.2 5a7 7 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path class="sfx__mute" d="m13.5 7.5 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="sfx__label" data-sfx-label>Sound off</span>
+    </button>
+  </header>
+
+  <!-- The network itself, as navigation: one node per layer, and a signal that follows the camera. -->
+  <nav class="rail" aria-label="Layers">
+    <span class="rail__track" aria-hidden="true"><span class="rail__signal" id="railSignal"></span></span>
+    <ol>
+      <li><a href="#intro" data-goto="0"><span class="rail__label">input</span><span class="rail__node"></span><span class="sr-only">Intro</span></a></li>
+      <li><a href="#about" data-goto="1"><span class="rail__label">embedding</span><span class="rail__node"></span><span class="sr-only">About</span></a></li>
+      <li><a href="#projects" data-goto="2"><span class="rail__label">hidden</span><span class="rail__node"></span><span class="sr-only">Projects</span></a></li>
+      <li><a href="#toolkit" data-goto="3"><span class="rail__label">weights</span><span class="rail__node"></span><span class="sr-only">Toolkit</span></a></li>
+      <li><a href="#now" data-goto="4"><span class="rail__label">attention</span><span class="rail__node"></span><span class="sr-only">Now</span></a></li>
+      <li><a href="#contact" data-goto="5"><span class="rail__label">output</span><span class="rail__node"></span><span class="sr-only">Contact</span></a></li>
+    </ol>
+  </nav>
+
+  <main id="stage">
+
+    <!-- 00 · INPUT ------------------------------------------------------- -->
+    <section id="intro" class="panel panel--intro" data-kind="input" aria-labelledby="h-intro">
+      <h1 id="h-intro" class="display reveal" tabindex="-1">Aaron <em>Hong</em></h1>
+      <p class="lede reveal">
+        Interested in the intersection of <span class="hl hl--mint">sound</span>, <span class="hl hl--violet">graphics</span>,
+        and <span class="hl hl--pink">machine learning</span>. Currently working on local ML benchmarks at Microsoft.
+      </p>
+      <div class="cta-row reveal">
+        <a class="btn btn--primary" href="#projects" data-goto="2">See the work <span aria-hidden="true">→</span></a>
+        <a class="btn" href="#contact" data-goto="5">Get in touch</a>
+      </div>
+      <p class="hint reveal">
+        Scroll to move through the network. With sound on, one tone is transformed by every layer it passes through,
+        and you can hover or tap the nodes to play them.
+      </p>
+    </section>
+
+    <!-- 01 · EMBEDDING --------------------------------------------------- -->
+    <section id="about" class="panel" data-kind="embedding" aria-labelledby="h-about">
+      <p class="eyebrow reveal"><span class="eyebrow__idx">01</span> Background</p>
+      <h2 id="h-about" class="title reveal" tabindex="-1">About</h2>
+      <p class="lede reveal">I'm Aaron, and I'm interested in “tasteful” uses of the computer.</p>
+      <p class="body reveal">
+        I graduated from the University of Waterloo with a degree in Computer Engineering, where I got to learn how
+        things work from the bottom up. I got my start in internships working across the entire graphics stack
+        (compilers, shaders, and applications) in OpenGL, Vulkan, and Vulkan SC.
+      </p>
+      <p class="body reveal">
+        Right now, I'm deeply interested in what's possible at the intersection of my work (machine learning),
+        my past (graphics and computing), and my hobby (music production).
+      </p>
+      <div class="embed reveal" role="group" aria-label="Interests">
+        <p class="embed__label mono">embed("aaron")</p>
+        <ul>
+          <li style="--v:.96"><span>Machine learning</span><span class="bar"><i></i></span><span class="mono">0.96</span></li>
+          <li style="--v:.95"><span>Graphics</span><span class="bar"><i></i></span><span class="mono">0.95</span></li>
+          <li style="--v:.91"><span>Music production</span><span class="bar"><i></i></span><span class="mono">0.91</span></li>
+          <li style="--v:.87"><span>Systems</span><span class="bar"><i></i></span><span class="mono">0.87</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 02 · HIDDEN ------------------------------------------------------ -->
+    <section id="projects" class="panel panel--wide" data-kind="hidden" aria-labelledby="h-projects">
+      <p class="eyebrow reveal"><span class="eyebrow__idx">02</span> Selected work</p>
+      <h2 id="h-projects" class="title reveal" tabindex="-1">Projects <span class="title__sub">/ Public Work</span></h2>
+
+      <ol class="tracklist">
+        <!--
+          To add a project, copy one <li class="project"> block and renumber.
+          Keep "This site" as the last entry.
+        -->
+        <li class="project reveal">
+          <div class="project__idx mono">01</div>
+          <div class="project__body">
+            <div class="project__head">
+              <h3>MLPerf Client</h3>
+              <span class="project__meta mono">MLCommons · Open source</span>
+            </div>
+            <p>
+              MLCommons' benchmark for ML inference on client devices: LLM and image-generation workloads,
+              measured across PC hardware and runtimes.
+            </p>
+            <p class="role__label mono">My work · Windows ML path</p>
+            <ul class="role">
+              <li>Keep the Windows ML (WinML) paths working well across hardware vendors.</li>
+              <li>Build ONNX models for WinML whenever a vendor doesn't supply one.</li>
+              <li>Work with NVIDIA, AMD, Intel, and Qualcomm to make sure their WinML paths are correct and performant.</li>
+              <li>Debug and triage performance issues.</li>
+              <li>Implemented the FLUX image-generation path for WinML in the upcoming 2.1 release.</li>
+            </ul>
+            <ul class="chips" aria-label="Technologies">
+              <li class="chip">Windows ML</li><li class="chip">ONNX</li><li class="chip">LLM inference</li>
+              <li class="chip">FLUX</li><li class="chip">GPU · NPU</li>
+            </ul>
+            <div class="project__links">
+              <a class="btn btn--sm" href="https://github.com/mlcommons/mlperf_client" target="_blank" rel="noopener">Source <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </li>
+
+        <li class="project reveal">
+          <div class="project__idx mono">02</div>
+          <div class="project__body">
+            <div class="project__head">
+              <h3>Grass</h3>
+              <span class="project__meta mono"><span class="live-dot" aria-hidden="true"></span>Live · WebGPU</span>
+            </div>
+            <p>
+              A real-time meadow in the browser, with up to a few million individually simulated grass blades
+              on a 10&nbsp;m × 10&nbsp;m field. Each blade is an elastic rod solved with XPBD in WebGPU compute shaders,
+              pushed around by a 2D wind simulation. You can press the grass down with your cursor, and the rustle
+              you hear is synthesized from the simulated leaf motion. There's no recorded wind bed.
+            </p>
+            <dl class="specs">
+              <div><dt>Physics</dt><dd>XPBD rods</dd></div>
+              <div><dt>Blades</dt><dd>Up to millions</dd></div>
+              <div><dt>Audio</dt><dd>16 spatial zones</dd></div>
+              <div><dt>Output</dt><dd>HDR · AgX · TAA</dd></div>
+            </dl>
+            <ul class="chips" aria-label="Technologies">
+              <li class="chip">WebGPU</li><li class="chip">WGSL compute</li><li class="chip">AudioWorklet</li>
+              <li class="chip">Wind simulation</li><li class="chip">PBR shading</li>
+            </ul>
+            <div class="project__links">
+              <a class="btn btn--primary btn--sm" href="https://grass.aajghong.com" target="_blank" rel="noopener">Live demo <span aria-hidden="true">↗</span></a>
+              <a class="btn btn--sm" href="https://github.com/aaronjghong/grass" target="_blank" rel="noopener">Source <span aria-hidden="true">↗</span></a>
+            </div>
+            <p class="project__note">Needs a WebGPU-capable browser. Best with headphones.</p>
+          </div>
+        </li>
+
+        <li class="project reveal">
+          <div class="project__idx mono">03</div>
+          <div class="project__body">
+            <div class="project__head">
+              <h3>This site</h3>
+              <span class="project__meta mono"><span class="live-dot" aria-hidden="true"></span>You are here</span>
+            </div>
+            <p>
+              A portfolio laid out as a small neural network in three.js. Each section is a layer, and moving between
+              them is a forward pass. With sound on, a single tone is transformed by each layer it passes through
+              (harmonics, wind, frequency modulation, echoes) until it resolves into a chord at the output,
+              and every node can be played.
+            </p>
+            <ul class="chips" aria-label="Technologies">
+              <li class="chip">three.js</li><li class="chip">GLSL</li><li class="chip">Web Audio</li><li class="chip">Cloudflare Pages</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 03 · WEIGHTS ----------------------------------------------------- -->
+    <section id="toolkit" class="panel" data-kind="weights" aria-labelledby="h-toolkit">
+      <p class="eyebrow reveal"><span class="eyebrow__idx">03</span> Tools &amp; skills</p>
+      <h2 id="h-toolkit" class="title reveal" tabindex="-1">Toolkit</h2>
+      <p class="body reveal">Roughly ordered by how much I lean on them.</p>
+      <div class="weights">
+        <div class="weights__row reveal">
+          <p class="weights__label">Machine learning</p>
+          <ul class="chips">
+            <li class="chip" style="--w:1">Windows ML</li><li class="chip" style="--w:.95">ONNX</li>
+            <li class="chip" style="--w:.85">Inference performance</li><li class="chip" style="--w:.7">Python</li>
+          </ul>
+        </div>
+        <div class="weights__row reveal">
+          <p class="weights__label">Graphics</p>
+          <ul class="chips">
+            <li class="chip" style="--w:1">Vulkan · Vulkan SC</li><li class="chip" style="--w:.9">OpenGL</li>
+            <li class="chip" style="--w:.85">DirectX</li><li class="chip" style="--w:.8">Shader compilers</li>
+            <li class="chip" style="--w:.7">GLSL</li>
+          </ul>
+        </div>
+        <div class="weights__row reveal">
+          <p class="weights__label">Systems</p>
+          <ul class="chips">
+            <li class="chip" style="--w:1">C/C++</li><li class="chip" style="--w:.8">Rust</li>
+            <li class="chip" style="--w:.7">SystemVerilog</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 · ATTENTION --------------------------------------------------- -->
+    <section id="now" class="panel" data-kind="attention" aria-labelledby="h-now">
+      <p class="eyebrow reveal"><span class="eyebrow__idx">04</span> Currently exploring</p>
+      <h2 id="h-now" class="title reveal" tabindex="-1">Now</h2>
+      <p class="body reveal">What I'm paying attention to at the moment.</p>
+      <ol class="attn">
+        <li class="reveal" style="--a:.34">
+          <span class="attn__w mono">.34</span>
+          <div><h3>Local ML performance</h3><p>Making on-device inference fast, and fairly comparable, across PC hardware.</p></div>
+        </li>
+        <li class="reveal" style="--a:.27">
+          <span class="attn__w mono">.27</span>
+          <div><h3>Sound from simulation</h3><p>Audio that comes straight out of the physics, so things sound the way they move.</p></div>
+        </li>
+        <li class="reveal" style="--a:.23">
+          <span class="attn__w mono">.23</span>
+          <div><h3>ML as an instrument</h3><p>Models you play like an instrument, rather than ones you only prompt.</p></div>
+        </li>
+        <li class="reveal" style="--a:.16">
+          <span class="attn__w mono">.16</span>
+          <div><h3>Neural rendering</h3><p>Learned scene representations and where they fit inside real-time engines.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 05 · OUTPUT ------------------------------------------------------ -->
+    <section id="contact" class="panel" data-kind="output" aria-labelledby="h-contact">
+      <p class="eyebrow reveal"><span class="eyebrow__idx">05</span> Get in touch</p>
+      <h2 id="h-contact" class="title reveal" tabindex="-1">Contact</h2>
+      <p class="lede reveal">Working on something that needs graphics, sound, or a model in the loop? I'd like to hear about it.</p>
+      <!-- TODO: replace hello@aajghong.com with your real address (it appears in this section only). -->
+      <a class="mail reveal" href="mailto:hello@aajghong.com">hello@aajghong.com</a>
+
+      <div class="softmax reveal" role="group" aria-label="Pick a reason to get in touch">
+        <p class="softmax__label mono">softmax(reason)</p>
+        <a href="mailto:hello@aajghong.com?subject=Collaboration" style="--p:.38"><span>Collaboration</span><span class="bar"><i></i></span><span class="mono">0.38</span></a>
+        <a href="mailto:hello@aajghong.com?subject=Opportunity" style="--p:.31"><span>Work / hiring</span><span class="bar"><i></i></span><span class="mono">0.31</span></a>
+        <a href="mailto:hello@aajghong.com?subject=Graphics%20%26%20audio" style="--p:.24"><span>Talking shop</span><span class="bar"><i></i></span><span class="mono">0.24</span></a>
+        <a href="mailto:hello@aajghong.com?subject=Hello" style="--p:.07"><span>Saying hi</span><span class="bar"><i></i></span><span class="mono">0.07</span></a>
+      </div>
+
+      <ul class="socials reveal">
+        <li><a href="https://github.com/aaronjghong" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></li>
+        <li><a href="https://grass.aajghong.com" target="_blank" rel="noopener">grass.aajghong.com <span aria-hidden="true">↗</span></a></li>
+      </ul>
+      <p class="colophon reveal">© <span id="year">2026</span> Aaron Hong · Built with three.js and Web Audio</p>
+    </section>
+  </main>
+</body>
+</html>
