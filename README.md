@@ -1,4 +1,4 @@
-# aajghong.com: portfolio
+# [aajghong.com](https://aajghong.com): portfolio
 
 A single-page portfolio laid out as a small neural network in three.js. Each section is a layer.
 Moving between sections runs a "forward pass": the camera glides along the connections while a soft
@@ -42,7 +42,7 @@ No build step. three.js loads from jsDelivr through the import map in `index.htm
 - **Add a project:** in `index.html`, copy a `<li class="project">` block inside `.tracklist`,
   renumber, and set the live/source links. Keep "This site" as the last entry.
 - **Tune the sound:** the per-layer table `LAYER_PARAMS` at the top of `src/audio.js`.
-- **Email:** replace `hello@aajghong.com` in the Contact section with your real address.
+- **Email:** `aaron@aajghong.com` appears only in the Contact section (the address and the softmax links).
 - **Sections:** each `<section class="panel">` must line up with an entry in `LAYERS` in `src/world.js`
   (same order and count).
 
